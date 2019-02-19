@@ -14,7 +14,7 @@ int* getFunctionFromFile(char* filename) {
     char* subStirng;
     char* line = NULL;
     size_t lineBufflen = 0;
-    ssize_t lineLen = 0;
+    size_t lineLen = 0;
     FILE* fp;
     fp = fopen(filename, "r");
     if (fp == NULL) {
@@ -50,7 +50,7 @@ int mod(int num, int base) {
 struct Automa pasreInitState(char* filename) {
     char* line = NULL;
     size_t lineBufflen = 0;
-    ssize_t lineLen = 0;
+    size_t lineLen = 0;
     FILE* fp;
     fp = fopen(filename, "r");
     if (fp == NULL) {
