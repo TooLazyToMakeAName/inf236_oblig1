@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <mpi.h>
 #include <string.h>
+#include <time.h>	
 //#include <sys/types.h>
 
 struct Automa {
@@ -96,8 +97,10 @@ int main(int argc, char** argv) {
     MPI_Status receiveStatusStartElement;
     MPI_Status receiveStatusEndElement;
     unsigned int t;
+    clock_t begin;
     sscanf(argv[3], "%d", &t);
     if (rank == 0) {
+	begin = clock();
         automa = pasreInitState(binaryString);
         fx = getFunctionFromFile(fxFile);
         fx[8] = automa.stateLengths;
@@ -114,7 +117,16 @@ int main(int argc, char** argv) {
     int* placeHolder = malloc(seqBuffExtendedLength);
     int* seqBuff = &seqBuffExtended[1];
     MPI_Scatter(automa.initState, seqSize, MPI_INT, seqBuff, seqSize, MPI_INT, 0, MPI_COMM_WORLD);
+    int p = t/100;
+    int bar = 0;
     for (int i = 0; i < t; ++i) {
+	if(rank==0){
+	    if((i-bar)> p){
+		printf("=");
+		fflush(stdout);
+		bar = i;
+		}
+	}
         MPI_Isend(&seqBuff[0], 1, MPI_INT, mod(rank - 1, comm_sz), t+1 , MPI_COMM_WORLD, &sendRequesStartElement);
         MPI_Isend(&seqBuff[seqSize - 1], 1, MPI_INT, mod(rank + 1, comm_sz), t, MPI_COMM_WORLD, &sendRequestEndElement);
         MPI_Recv(&seqBuffExtended[0], 1, MPI_INT, mod(rank - 1, comm_sz), t, MPI_COMM_WORLD, &receiveStatusStartElement);
@@ -129,20 +141,18 @@ int main(int argc, char** argv) {
         seqBuffExtended = temp;
         seqBuff = &seqBuffExtended[1];
 
-        MPI_Gather(seqBuff, seqSize, MPI_INT, automa.initState, seqSize, MPI_INT, 0, MPI_COMM_WORLD);
-        if (rank == 0) {
-            print(automa.initState, automa.stateLengths);
-        }
 
     }
-
+    MPI_Gather(seqBuff, seqSize, MPI_INT, automa.initState, seqSize, MPI_INT, 0, MPI_COMM_WORLD);
     if (rank == 0) {
+	clock_t end = clock();
+	double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+	printf("\n%.6f\n", time_spent);
         free(automa.initState);
     }
 
     //*/
     MPI_Finalize();
-    free(seqBuffExtended);
     free(fx);
 
     return 0;
