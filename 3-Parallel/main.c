@@ -105,7 +105,16 @@ int main(int argc, char** argv) {
     MPI_Bcast(operator,setSize*setSize,  MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Scatter(senderBuff,var.lenBranch*3, MPI_INT, var.triplets ,var.lenBranch*3, MPI_INT, 0, MPI_COMM_WORLD);
     int value = 0;
+    int p = var.lenBranch/100;
+    int bar = 0;
     for (int i = 0; i < var.lenBranch; ++i) {	
+	if(rank==0){
+	    if((i-bar)> p){
+		printf("=");
+		fflush(stdout);
+		bar = i;
+		}
+	}
 	int tripletIndex = i*3;
 	int j = var.triplets[tripletIndex];
 	int flaseState = var.triplets[tripletIndex+1];	
@@ -135,24 +144,3 @@ int main(int argc, char** argv) {
     MPI_Finalize();
     return 0;
 }
-
-/* INPUT DEBUG
-    if(rank == 0) {
-        var = getFunctionFromFile(argv[1]);
-        printf("%d\n",var.lenBoolString);
-        printf("%d\n",var.lenBranch);
-        printf("%d\n",var.setSize);
-        printf("%d\n",var.numCorrectAws);
-        for (int j = 0; j < var.setSize; ++j) {
-        for (int i = 0; i < var.setSize; ++i) {
-           printf("%d %d %d\n",j,i,doMapping(&var, j,i));
-        }
-        }
-        for (int k = 0; k < var.numCorrectAws; ++k) {
-            printf("%d\n", var.goodState[k]);
-        }
-        for (int l = 0; l < var.lenBranch; ++l) {
-           printf("%d, %d, %d\n", var.triplets[l*3], var.triplets[(l*3)+1], var.triplets[(l*3)+2]);
-        }
-    }
-//*/
