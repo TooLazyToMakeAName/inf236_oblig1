@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
 
     int seqSize = fx[8] / (comm_sz);
     int seqBuffExtendedLength = sizeof(int) * (seqSize + 2);        //adds buffer space for the two odd elemetes
-    int* seqBuffExtended = malloc(seqBuffExtendedLength);           //remember that everyting is now 1 index (ehh)
+    int* seqBuffExtended = malloc(seqBuffExtendedLength);     
     int* placeHolder = malloc(seqBuffExtendedLength);
     int* seqBuff = &seqBuffExtended[1];
     MPI_Scatter(automa.initState, seqSize, MPI_INT, seqBuff, seqSize, MPI_INT, 0, MPI_COMM_WORLD);
